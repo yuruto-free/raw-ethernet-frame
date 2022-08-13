@@ -3,8 +3,6 @@
 #include <stdint.h>
 #define REF_ETHER_MACADDR_LENGTH (18)
 #define REF_IPADDR_LENGTH (16)
-#define REF_USE_TCP (0x06)
-#define REF_USE_UDP (0x11)
 
 struct ether_header_t {
     char dstMacAddr[REF_ETHER_MACADDR_LENGTH];
@@ -25,7 +23,17 @@ struct ip_header_t {
     char srcIPAddr[REF_IPADDR_LENGTH];
     char dstIPAddr[REF_IPADDR_LENGTH];
     uint8_t protocol;
-    uint8_t padding[3];
+    uint8_t flags;
+    uint8_t dscp;
+    uint8_t ECT_CE; // ECT: upper 4bit, CE: lower 4bit [ex: 0x10 -> ECT = 1, CE = 0]
+};
+
+struct udp_header_t {
+    uint16_t srcPort;
+    uint16_t dstPort;
+    uint16_t dataLength;
+    uint16_t checksum;
+    uint8_t *data;
 };
 
 #endif

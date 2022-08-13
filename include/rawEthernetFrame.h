@@ -3,7 +3,12 @@
 #include <stdint.h>
 #define REF_SUCCESS (0)
 #define REF_FAILED (1)
+// for ether header
 #define REF_MACADDR_LENGTH (6)
+// for TCP/UDP header
+#define REF_USE_TCP (0x06)
+#define REF_USE_UDP (0x11)
+// for dump function
 #define REF_ETHER_PACKET (0x01)
 #define REF_IP_PACKET (0x02)
 #define REF_UDP_PACKET (0x03)
@@ -24,13 +29,29 @@ struct REF_param_t {
     struct {
         uint8_t ttl;
         uint8_t tos; // type of service
-        uint8_t protocol; // REF_USE_TCP or REF_USE_UDP (packetStructure.h)
+        uint8_t protocol; // REF_USE_TCP or REF_USE_UDP
         uint8_t padding;
         uint16_t fragOffset;
         uint16_t id;
         uint32_t srcAddr;
         uint32_t dstAddr;
     } ip;
+    // UDP header
+    struct {
+        uint16_t srcPort;
+        uint16_t dstPort;
+        uint16_t dataLength;
+        uint16_t padding;
+    } udp;
+    // TCP header
+    struct {
+        uint16_t srcPort;
+        uint16_t dstPort;
+        uint32_t seqNum;
+        uint32_t ackNum;
+        uint16_t dataLength;
+    } tcp;
+    uint8_t *data;
 };
 
 /**

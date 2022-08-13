@@ -7,22 +7,22 @@
 /**
  * @brief setup ether header
  * 
- * @param[in] dstMacAddr destination MAC address
- * @param[in] srcMacAddr source MAC address
+ * @param[in]  dstMacAddr destination MAC address
+ * @param[in]  srcMacAddr source MAC address
  * @param[out] frame      raw frame
- * @return ETHER_HEADER_RETURN_OK : success
- *         ETHER_HEADER_RETURN_NG : failed
+ * @return     ETHER_HEADER_RETURN_OK : success
+ *             ETHER_HEADER_RETURN_NG : failed
  */
 int32_t setupEtherHeader(const uint8_t *dstMacAddr, const uint8_t *srcMacAddr, struct REF_rawFrame_t *frame);
 
 /**
  * @brief dump ether header of raw frame
  * 
- * @param[in] ptr   raw data
+ * @param[in]  ptr  raw data
  * @param[out] eth  ether header packet
  * @param[out] size packet length
- * @return ETHER_HEADER_RETURN_OK : success
- *         ETHER_HEADER_RETURN_NG : failed
+ * @return     ETHER_HEADER_RETURN_OK : success
+ *             ETHER_HEADER_RETURN_NG : failed
  */
 int32_t dumpEtherHeader(const uint8_t *ptr, struct ether_header_t *eth, size_t *size);
 

@@ -15,10 +15,10 @@ int32_t setupEtherHeader(const uint8_t *dstMacAddr, const uint8_t *srcMacAddr, s
     if ((NULL != dstMacAddr) && (NULL != srcMacAddr) && (NULL != frame)) {
         memcpy(eth.ether_dhost, dstMacAddr, sizeof(eth.ether_dhost));
         memcpy(eth.ether_shost, srcMacAddr, sizeof(eth.ether_shost));
-        eth.ether_type = wrapper_htos(ETHERTYPE_IP);
+        eth.ether_type = wrapper_htons(ETHERTYPE_IP);
+        // update raw frame
         memcpy(&frame->buf[frame->length], &eth, size);
         frame->length += (int32_t)size;
-
         retVal = (int32_t)ETHER_HEADER_RETURN_OK;
     }
 
@@ -37,8 +37,8 @@ int32_t dumpEtherHeader(const uint8_t *ptr, struct ether_header_t *eth, size_t *
         addr = eth->srcMacAddr;
         wrapper_ether_ntoa((const uint8_t *)(base->ether_shost), &addr, (size_t)REF_ETHER_MACADDR_LENGTH);
         eth->etherType = wrapper_ntohs(base->ether_type);
+        eth->padding = 0;
         (*size) = sizeof(struct ether_header);
-
         retVal = (int32_t)ETHER_HEADER_RETURN_OK;
     }
 
