@@ -34,8 +34,8 @@ int32_t setupUdpHeader(const struct udp_header_arg_t *arg, struct REF_rawFrame_t
     int32_t retVal = (int32_t)UDP_HEADER_RETURN_NG;
     struct udphdr udp;
     struct pseudo_header_t ph;
-    int32_t pos;
     size_t udpHeaderSize;
+    uint8_t *ptr;
 
     if ((NULL != arg) && (NULL != frame)) {
         // setup udp header
@@ -56,11 +56,11 @@ int32_t setupUdpHeader(const struct udp_header_arg_t *arg, struct REF_rawFrame_t
         // calculate checksum
         udp.uh_sum = calcChksum((const uint8_t *)&ph, (const uint8_t *)(arg->data), sizeof(struct pseudo_header_t), arg->dataLength);
         // update raw frame
-        pos = frame->length;
-        memcpy(&(frame->buf[pos]), &udp, udpHeaderSize);
-        pos = frame->length + (int32_t)udpHeaderSize;
-        memcpy(&(frame->buf[pos]), arg->data, arg->dataLength);
-        frame->length += ((int32_t)udpHeaderSize + arg->dataLength);
+        ptr = &(frame->buf[frame->length]);
+        memcpy(ptr, &udp, udpHeaderSize);
+        ptr += udpHeaderSize;
+        memcpy(ptr, arg->data, arg->dataLength);
+        frame->length += (int32_t)((uint16_t)udpHeaderSize + arg->dataLength);
         retVal = (int32_t)UDP_HEADER_RETURN_OK;
     }
 
@@ -80,7 +80,7 @@ int32_t dumpUdpHeader(const uint8_t *ptr, struct udp_header_t *udp, size_t *size
         udp->checksum = wrapper_ntohs(base->uh_sum);
         udp->dataLength = udp->segmentLength - udpHeaderSize;
         udp->data = (uint8_t *)ptr + udpHeaderSize;
-        (*size) = udpHeaderSize;
+        (*size) = (size_t)(udp->segmentLength);
         retVal = (int32_t)UDP_HEADER_RETURN_OK;
     }
 

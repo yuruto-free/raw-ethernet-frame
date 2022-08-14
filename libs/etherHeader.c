@@ -9,16 +9,18 @@
 int32_t setupEtherHeader(const uint8_t *dstMacAddr, const uint8_t *srcMacAddr, struct REF_rawFrame_t *frame) {
     int32_t retVal = (int32_t)ETHER_HEADER_RETURN_NG;
     struct ether_header eth;
-    size_t size = sizeof(struct ether_header);
-    memset(&eth, 0x00, size);
+    size_t etherHeaderSize = sizeof(struct ether_header);
+    uint8_t *ptr;
+    memset(&eth, 0x00, etherHeaderSize);
 
     if ((NULL != dstMacAddr) && (NULL != srcMacAddr) && (NULL != frame)) {
         memcpy(eth.ether_dhost, dstMacAddr, sizeof(eth.ether_dhost));
         memcpy(eth.ether_shost, srcMacAddr, sizeof(eth.ether_shost));
         eth.ether_type = wrapper_htons(ETHERTYPE_IP);
         // update raw frame
-        memcpy(&frame->buf[frame->length], &eth, size);
-        frame->length += (int32_t)size;
+        ptr = &(frame->buf[frame->length]);
+        memcpy(ptr, &eth, etherHeaderSize);
+        frame->length += (int32_t)etherHeaderSize;
         retVal = (int32_t)ETHER_HEADER_RETURN_OK;
     }
 

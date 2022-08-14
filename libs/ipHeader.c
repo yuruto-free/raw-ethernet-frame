@@ -17,11 +17,12 @@ int32_t setupIPHeader(const struct ip_header_arg_t *arg, size_t transportLayerSi
     int32_t retVal = (int32_t)IP_HEADER_RETURN_NG;
     struct iphdr ip;
     size_t ipHeaderSize = sizeof(struct iphdr);
+    uint8_t *ptr;
     memset(&ip, 0x00, ipHeaderSize);
 
     if ((NULL != arg) && (NULL != frame)) {
-        ip.version = IP_HEADER_VERSION;
-        ip.ihl = CALC_IHL(IP_HEADER_LENGTH);
+        ip.version = (uint8_t)IP_HEADER_VERSION;
+        ip.ihl = (uint8_t)CALC_IHL(IP_HEADER_LENGTH);
         ip.tos = arg->tos;
         ip.tot_len = wrapper_htons(transportLayerSize + ipHeaderSize);
         ip.id = wrapper_htons(arg->id);
@@ -33,8 +34,9 @@ int32_t setupIPHeader(const struct ip_header_arg_t *arg, size_t transportLayerSi
         ip.daddr = arg->dstAddr;
         ip.check = ~calcTotal((const uint8_t *)&ip, (int32_t)ipHeaderSize, 0);
         // update raw frame
-        memcpy(&frame->buf[frame->length], &ip, ipHeaderSize);
-        frame->length += ipHeaderSize;
+        ptr = &(frame->buf[frame->length]);
+        memcpy(ptr, &ip, ipHeaderSize);
+        frame->length += (int32_t)ipHeaderSize;
         retVal = (int32_t)IP_HEADER_RETURN_OK;
     }
 
@@ -57,16 +59,16 @@ int32_t dumpIPHeader(const uint8_t *ptr, struct ip_header_t *ip, size_t *size) {
         ip->totalLength = wrapper_ntohs(base->tot_len);
         ip->id = wrapper_ntohs(base->id);
         ip->fragOffset = offset;
-        ip->flags = CALC_FLAGS(offset);
+        ip->flags = (uint8_t)CALC_FLAGS(offset);
         ip->checksum = wrapper_ntohs(base->check);
         ip->protocol = base->protocol;
-        ip->dscp = CALC_DSCP(base->tos);
-        ip->ECT_CE = CALC_ECTCE(base->tos);
+        ip->dscp = (uint8_t)CALC_DSCP(base->tos);
+        ip->ECT_CE = (uint8_t)CALC_ECTCE(base->tos);
         addr = ip->srcIPAddr;
         wrapper_ip_ntoa(base->saddr, &addr);
         addr = ip->dstIPAddr;
         wrapper_ip_ntoa(base->daddr, &addr);
-        (*size) = CALC_IP_HEADER_LEN(base->ihl);
+        (*size) = (size_t)CALC_IP_HEADER_LEN(base->ihl);
         retVal = (int32_t)IP_HEADER_RETURN_OK;
     }
 
