@@ -8,6 +8,7 @@
 #define IP_HEADER_VERSION (4)
 #define IP_HEADER_LENGTH (20)
 #define CALC_IHL(len) ((len) / 4)
+#define CALC_IP_HEADER_LEN(ihl) ((ihl) * 4)
 #define CALC_FLAGS(x) (((x) >> 13) & 0x07)
 #define CALC_DSCP(x) (((x) >> 2) & 0x3F)
 #define CALC_ECTCE(x) ((((x) << 3) & 0x10) | ((x) & 0x01))
@@ -43,11 +44,11 @@ int32_t setupIPHeader(const struct ip_header_arg_t *arg, size_t transportLayerSi
 int32_t dumpIPHeader(const uint8_t *ptr, struct ip_header_t *ip, size_t *size) {
     int32_t retVal = (int32_t)IP_HEADER_RETURN_NG;
     uint16_t offset;
-    struct iphdr *base;
+    const struct iphdr *base;
     char *addr;
 
     if ((NULL != ptr) && (NULL != ip) && (NULL != size)) {
-        base = (struct iphdr *)ptr;
+        base = (const struct iphdr *)ptr;
         offset = wrapper_ntohs(base->frag_off);
         ip->version = base->version;
         ip->headerLength = base->ihl;
@@ -57,7 +58,7 @@ int32_t dumpIPHeader(const uint8_t *ptr, struct ip_header_t *ip, size_t *size) {
         ip->id = wrapper_ntohs(base->id);
         ip->fragOffset = offset;
         ip->flags = CALC_FLAGS(offset);
-        ip->checksum = base->check;
+        ip->checksum = wrapper_ntohs(base->check);
         ip->protocol = base->protocol;
         ip->dscp = CALC_DSCP(base->tos);
         ip->ECT_CE = CALC_ECTCE(base->tos);
@@ -65,7 +66,7 @@ int32_t dumpIPHeader(const uint8_t *ptr, struct ip_header_t *ip, size_t *size) {
         wrapper_ip_ntoa(base->saddr, &addr);
         addr = ip->dstIPAddr;
         wrapper_ip_ntoa(base->daddr, &addr);
-        (*size) = sizeof(struct iphdr);
+        (*size) = CALC_IP_HEADER_LEN(base->ihl);
         retVal = (int32_t)IP_HEADER_RETURN_OK;
     }
 

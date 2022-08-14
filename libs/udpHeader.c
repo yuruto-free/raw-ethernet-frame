@@ -10,7 +10,8 @@
 struct pseudo_header_t {
     uint32_t srcIPAddr;
     uint32_t dstIPAddr;
-    uint16_t protocol; // reserved(uint8_t) + protocol(uint8_t)
+    uint8_t reserved;
+    uint8_t protocol;
     uint16_t dataLength;
     uint16_t srcPort;
     uint16_t dstPort;
@@ -37,6 +38,7 @@ int32_t setupUdpHeader(const struct udp_header_arg_t *arg, struct REF_rawFrame_t
     size_t udpHeaderSize;
 
     if ((NULL != arg) && (NULL != frame)) {
+        // setup udp header
         udpHeaderSize = sizeof(struct udphdr);
         udp.uh_sport = wrapper_htons(arg->srcPort);
         udp.uh_dport = wrapper_htons(arg->dstPort);
@@ -44,12 +46,14 @@ int32_t setupUdpHeader(const struct udp_header_arg_t *arg, struct REF_rawFrame_t
         // setup pseudo header
         ph.srcIPAddr = arg->srcIPAddr;
         ph.dstIPAddr = arg->dstIPAddr;
-        ph.protocol = wrapper_htons((uint16_t)IPPROTO_UDP);
+        ph.reserved = 0;
+        ph.protocol = (uint8_t)IPPROTO_UDP;
         ph.dataLength = udp.uh_ulen;
-        ph.srcPort = wrapper_htons(arg->srcPort);
-        ph.dstPort = wrapper_htons(arg->dstPort);
+        ph.srcPort = udp.uh_sport;
+        ph.dstPort = udp.uh_dport;
         ph.len = udp.uh_ulen;
         ph.checksum = 0;
+        // calculate checksum
         udp.uh_sum = calcChksum((const uint8_t *)&ph, (const uint8_t *)(arg->data), sizeof(struct pseudo_header_t), arg->dataLength);
         // update raw frame
         pos = frame->length;
@@ -65,15 +69,16 @@ int32_t setupUdpHeader(const struct udp_header_arg_t *arg, struct REF_rawFrame_t
 
 int32_t dumpUdpHeader(const uint8_t *ptr, struct udp_header_t *udp, size_t *size) {
     int32_t retVal = (int32_t)UDP_HEADER_RETURN_NG;
-    struct udphdr *base;
+    const struct udphdr *base;
     size_t udpHeaderSize = sizeof(struct udphdr);
 
     if ((NULL != ptr) && (NULL != udp) && (NULL != size)) {
-        base = (struct udphdr *)ptr;
+        base = (const struct udphdr *)ptr;
         udp->srcPort = wrapper_ntohs(base->uh_sport);
         udp->dstPort = wrapper_ntohs(base->uh_dport);
-        udp->dataLength = wrapper_ntohs(base->uh_ulen);
-        udp->checksum = base->uh_sum;
+        udp->segmentLength = wrapper_ntohs(base->uh_ulen);
+        udp->checksum = wrapper_ntohs(base->uh_sum);
+        udp->dataLength = udp->segmentLength - udpHeaderSize;
         udp->data = (uint8_t *)ptr + udpHeaderSize;
         (*size) = udpHeaderSize;
         retVal = (int32_t)UDP_HEADER_RETURN_OK;

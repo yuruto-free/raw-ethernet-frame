@@ -3,9 +3,10 @@ Create a raw IEEE 802.3 Ethernet frame to send udp/tcp packets.
 
 ## Restriction
 * The operation check is confirmed only on Linux.
-* VLAN is not supported.
+* VLAN is **not** supported.
 * Only IPv4 is supported.
-* IP header is not include the `option`.
+* The IP header does not contain an `option` field.
+* The `option` field of TCP header is not checked.
 
 ## Usage
 ### Build

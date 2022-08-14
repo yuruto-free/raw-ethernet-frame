@@ -33,7 +33,7 @@ uint16_t calcTotal(const uint8_t *data, int32_t size, uint16_t initValue) {
         sum = SHIFT_CHECKSUM(sum);
     }
 
-    return (uint16_t)sum;
+    return (uint16_t)(sum & (uint32_t)CHECKSUM_MASK);
 }
 
 int32_t wrapper_ether_aton(const char *asciiAddr, uint8_t *networkAddr, size_t size) {
@@ -106,10 +106,10 @@ uint16_t wrapper_ntohs(uint16_t networkshort) {
     return (uint16_t)ntohs(networkshort);
 }
 
-uint32_t wrapper_htonl(uint16_t hostlong) {
+uint32_t wrapper_htonl(uint32_t hostlong) {
     return (uint32_t)htonl(hostlong);
 }
 
-uint32_t wrapper_ntohl(uint16_t networklong) {
+uint32_t wrapper_ntohl(uint32_t networklong) {
     return (uint32_t)ntohl(networklong);
 }

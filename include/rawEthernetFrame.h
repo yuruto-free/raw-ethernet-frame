@@ -12,7 +12,7 @@
 #define REF_ETHER_PACKET (0x01)
 #define REF_IP_PACKET (0x02)
 #define REF_UDP_PACKET (0x03)
-#define REF_TCP_PACKET (0x03)
+#define REF_TCP_PACKET (0x04)
 
 // forward declaration
 struct REF_rawFrame_t;
@@ -49,32 +49,46 @@ struct REF_param_t {
         uint16_t dstPort;
         uint32_t seqNum;
         uint32_t ackNum;
+        uint16_t windowSize;
+        uint16_t urgentPointer;
         uint16_t dataLength;
+        uint16_t optionLength;
+        uint8_t flags;
+        //
+        // === The flags is defined by following structure ===
+        //
+        //     1bit  2bit  3bit  4bit  5bit  6bit  7bit  8bit
+        //   +-----+-----+-----+-----+-----+-----+-----+-----+
+        //   |  Reserved | URG | ACK | PSH | RST | SYN | FIN |
+        //   +-----+-----+-----+-----+-----+-----+-----+-----+
+        //   |<---   Upper Bit   --->|<---   Lower Bit   --->|
+        //
+        const uint8_t *options;
     } tcp;
-    uint8_t *data;
+    const uint8_t *data;
 };
 
 /**
  * @brief malloc raw frame
- * 
+ *
  * @param[out] frame raw frame
  * @return     REF_SUCCESS : success
- *             REF_FAILED  : failed 
+ *             REF_FAILED  : failed
  */
 int32_t REF_mallocRawFrame(struct REF_rawFrame_t **frame);
 
 /**
  * @brief free raw frame
- * 
+ *
  * @param[inout] frame raw frame
  * @return       REF_SUCCESS : success
- *               REF_FAILED  : failed 
+ *               REF_FAILED  : failed
  */
 int32_t REF_freeRawFrame(struct REF_rawFrame_t **frame);
 
 /**
  * @brief create raw frame
- * 
+ *
  * @param[in]  params ethernet frame parameters
  * @param[out] frame  raw frame
  * @return     REF_SUCCESS : success
@@ -83,8 +97,29 @@ int32_t REF_freeRawFrame(struct REF_rawFrame_t **frame);
 int32_t REF_createRawFrame(const struct REF_param_t *params, struct REF_rawFrame_t *frame);
 
 /**
+ * @brief
+ *
+ * @param[in]  frame  raw frame
+ * @param[out] length total length
+ * @return     REF_SUCCESS : success
+ *             REF_FAILED  : failed
+ */
+int32_t REF_getTotalRawFrameLength(const struct REF_rawFrame_t *frame, int32_t *length);
+
+/**
+ * @brief get data from raw frame
+ *
+ * @param[in]  frame raw frame
+ * @param[in]  idx   target index
+ * @param[out] data  target data
+ * @return     REF_SUCCESS : success
+ *             REF_FAILED  : failed
+ */
+int32_t REF_getData(const struct REF_rawFrame_t *frame, int32_t idx, uint8_t *data);
+
+/**
  * @brief dump raw frame
- * 
+ *
  * @param[in] frame    raw frame
  * @param[in] callback callback function to dump frame data
  * @return    REF_SUCCESS : success
@@ -94,7 +129,7 @@ int32_t REF_dumpRawFrame(const struct REF_rawFrame_t *frame, REF_callback callba
 
 /**
  * @brief convert mac address in ascii format to network format
- * 
+ *
  * @param[in]  asciiFormat   mac address in ascii format
  * @param[out] networkFormat mac address in network format
  * @return     REF_SUCCESS : success
@@ -104,7 +139,7 @@ int32_t REF_convertMacAddrAscii2Network(const char *asciiFormat, uint8_t *networ
 
 /**
  * @brief convert mac address in network format to ascii format
- * 
+ *
  * @param[in]  networkFormat mac address in network format
  * @param[out] asciiFormat   mac address in ascii format
  * @return     REF_SUCCESS : success
@@ -114,7 +149,7 @@ int32_t REF_convertMacAddrNetwork2Ascii(const uint8_t *networkFormat, char **asc
 
 /**
  * @brief convert ip address in ascii format to network format
- * 
+ *
  * @param[in]  asciiFormat   ip address in ascii format
  * @param[out] networkFormat ip address in network format
  * @return     REF_SUCCESS : success
@@ -124,7 +159,7 @@ int32_t REF_convertIPAddrAscii2Network(const char *asciiFormat, uint32_t *networ
 
 /**
  * @brief convert ip address in network format to ascii format
- * 
+ *
  * @param[in]  networkFormat ip address in network format
  * @param[out] asciiFormat   ip address in ascii format
  * @return     REF_SUCCESS : success

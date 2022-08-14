@@ -3,6 +3,13 @@
 #include <stdint.h>
 #define REF_ETHER_MACADDR_LENGTH (18)
 #define REF_IPADDR_LENGTH (16)
+#define REF_GET_TCP_FLAGS(x, shift) ((uint8_t)((x) >> (shift)) & (uint8_t)0x01)
+#define REF_GET_TCP_URG(x) REF_GET_TCP_FLAGS(x, 5)
+#define REF_GET_TCP_ACK(x) REF_GET_TCP_FLAGS(x, 4)
+#define REF_GET_TCP_PSH(x) REF_GET_TCP_FLAGS(x, 3)
+#define REF_GET_TCP_RST(x) REF_GET_TCP_FLAGS(x, 2)
+#define REF_GET_TCP_SYN(x) REF_GET_TCP_FLAGS(x, 1)
+#define REF_GET_TCP_FIN(x) REF_GET_TCP_FLAGS(x, 0)
 
 struct ether_header_t {
     char dstMacAddr[REF_ETHER_MACADDR_LENGTH];
@@ -31,8 +38,26 @@ struct ip_header_t {
 struct udp_header_t {
     uint16_t srcPort;
     uint16_t dstPort;
-    uint16_t dataLength;
+    uint16_t segmentLength;
     uint16_t checksum;
+    uint16_t dataLength;
+    uint16_t padding;
+    uint8_t *data;
+};
+
+struct tcp_header_t {
+    uint16_t srcPort;
+    uint16_t dstPort;
+    uint32_t seqNum;
+    uint32_t ackNum;
+    uint8_t dataOffset;
+    uint8_t flags;
+    uint16_t windowSize;
+    uint16_t checksum;
+    uint16_t urgentPointer;
+    uint16_t optionSize;
+    uint16_t dataLength;
+    uint8_t *options;
     uint8_t *data;
 };
 

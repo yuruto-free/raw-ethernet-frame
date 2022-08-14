@@ -75,7 +75,7 @@ uint16_t wrapper_ntohs(uint16_t networkshort);
  * @param[in] hostlong data of host byte order
  * @return networklong
  */
-uint32_t wrapper_htonl(uint16_t hostlong);
+uint32_t wrapper_htonl(uint32_t hostlong);
 
 /**
  * @brief convert network byte order to host byte order
@@ -83,6 +83,6 @@ uint32_t wrapper_htonl(uint16_t hostlong);
  * @param networklong data of network byte order
  * @return hostlong
  */
-uint32_t wrapper_ntohl(uint16_t networklong);
+uint32_t wrapper_ntohl(uint32_t networklong);
 
 #endif
