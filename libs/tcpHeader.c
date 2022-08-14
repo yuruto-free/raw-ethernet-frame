@@ -45,19 +45,19 @@ static uint16_t calcChksum(const struct checksum_arg_t *arg);
 int32_t setupTcpHeader(const struct tcp_header_arg_t *arg, struct REF_rawFrame_t *frame) {
     int32_t retVal = (int32_t)TCP_HEADER_RETURN_NG;
     struct tcphdr tcp;
-    struct checksum_arg_t phArg;
+    struct checksum_arg_t chksumArg;
     int32_t pos;
     uint8_t flags;
     uint16_t tcpBaseSize, tcpHeaderSize;
 
     if ((NULL != arg) && (NULL != frame)) {
         flags = arg->flags;
-        phArg.optionLength = arg->optionLength;
-        phArg.dataLength = arg->dataLength;
-        phArg.options = arg->options;
-        phArg.data = arg->data;
+        chksumArg.optionLength = arg->optionLength;
+        chksumArg.dataLength = arg->dataLength;
+        chksumArg.options = arg->options;
+        chksumArg.data = arg->data;
         tcpBaseSize = (uint16_t)sizeof(struct tcphdr);
-        tcpHeaderSize = tcpBaseSize + phArg.optionLength;
+        tcpHeaderSize = tcpBaseSize + chksumArg.optionLength;
         // setup tcp header
         tcp.source = wrapper_htons(arg->srcPort);
         tcp.dest = wrapper_htons(arg->dstPort);
@@ -70,29 +70,29 @@ int32_t setupTcpHeader(const struct tcp_header_arg_t *arg, struct REF_rawFrame_t
         tcp.urg_ptr = wrapper_htons(arg->urgentPointer);
         tcp.check = 0;
         // setup pseudo header
-        phArg.pseudoHeader.srcIPAddr = arg->srcIPAddr;
-        phArg.pseudoHeader.dstIPAddr = arg->dstIPAddr;
-        phArg.pseudoHeader.protocol = wrapper_htons((uint16_t)IPPROTO_TCP);
-        phArg.pseudoHeader.dataLength = wrapper_htons(tcpHeaderSize + arg->dataLength);
-        phArg.pseudoHeader.srcPort = wrapper_htons(arg->srcPort);
-        phArg.pseudoHeader.dstPort = wrapper_htons(arg->dstPort);
-        phArg.pseudoHeader.seqNum = tcp.seq;
-        phArg.pseudoHeader.ackNum = tcp.ack_seq;
-        phArg.pseudoHeader.dataOffset = (uint8_t)UPDATE_PSEUDO_DATAOFFSET(tcpHeaderSize);
-        phArg.pseudoHeader.flags = flags;
-        phArg.pseudoHeader.windowSize = tcp.window;
-        phArg.pseudoHeader.checksum = 0;
-        phArg.pseudoHeader.urgentPointer = tcp.urg_ptr;
+        chksumArg.pseudoHeader.srcIPAddr = arg->srcIPAddr;
+        chksumArg.pseudoHeader.dstIPAddr = arg->dstIPAddr;
+        chksumArg.pseudoHeader.protocol = wrapper_htons((uint16_t)IPPROTO_TCP);
+        chksumArg.pseudoHeader.dataLength = wrapper_htons(tcpHeaderSize + arg->dataLength);
+        chksumArg.pseudoHeader.srcPort = tcp.source;
+        chksumArg.pseudoHeader.dstPort = tcp.dest;
+        chksumArg.pseudoHeader.seqNum = tcp.seq;
+        chksumArg.pseudoHeader.ackNum = tcp.ack_seq;
+        chksumArg.pseudoHeader.dataOffset = (uint8_t)UPDATE_PSEUDO_DATAOFFSET(tcpHeaderSize);
+        chksumArg.pseudoHeader.flags = flags;
+        chksumArg.pseudoHeader.windowSize = tcp.window;
+        chksumArg.pseudoHeader.checksum = 0;
+        chksumArg.pseudoHeader.urgentPointer = tcp.urg_ptr;
         // calculate checksum
-        tcp.check = calcChksum((const struct checksum_arg_t *)&phArg);
+        tcp.check = calcChksum((const struct checksum_arg_t *)&chksumArg);
         // update raw frame
         pos = frame->length;
         memcpy(&(frame->buf[pos]), &tcp, tcpBaseSize);
         pos += (int32_t)tcpBaseSize;
-        memcpy(&(frame->buf[pos]), arg->options, phArg.optionLength);
-        pos += phArg.optionLength;
+        memcpy(&(frame->buf[pos]), arg->options, chksumArg.optionLength);
+        pos += chksumArg.optionLength;
         memcpy(&(frame->buf[pos]), arg->data, arg->dataLength);
-        frame->length += ((int32_t)tcpBaseSize + phArg.optionLength + arg->dataLength);
+        frame->length += ((int32_t)tcpBaseSize + chksumArg.optionLength + arg->dataLength);
         retVal = (int32_t)TCP_HEADER_RETURN_OK;
     }
 

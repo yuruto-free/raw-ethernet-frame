@@ -24,7 +24,7 @@ struct REF_param_t {
     struct {
         uint8_t dstMacAddr[REF_MACADDR_LENGTH]; // destination MAC address
         uint8_t srcMacAddr[REF_MACADDR_LENGTH]; // source MAC address
-    } ether_header;
+    } eth;
     // IP header
     struct {
         uint8_t ttl;

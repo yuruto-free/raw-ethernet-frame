@@ -130,16 +130,16 @@ static void setupUDP(struct REF_param_t *params) {
     memset(params, 0x00, sizeof(struct REF_param_t));
 
     // setup ether header
-    REF_convertMacAddrAscii2Network("11:22:33:44:55:66", params->ether_header.dstMacAddr);
-    REF_convertMacAddrAscii2Network("AA:BB:CC:DD:EE:FF", params->ether_header.srcMacAddr);
+    REF_convertMacAddrAscii2Network("11:22:33:44:55:66", params->eth.dstMacAddr);
+    REF_convertMacAddrAscii2Network("AA:BB:CC:DD:EE:FF", params->eth.srcMacAddr);
 
     // setup ip header
     params->ip.ttl = 0x40;
     params->ip.tos = 0x00;
     params->ip.fragOffset = 0x4000;
     params->ip.id = 0x051c;
-    REF_convertIPAddrAscii2Network("192.168.1.2", &(params->ip.srcAddr));
-    REF_convertIPAddrAscii2Network("192.168.1.3", &(params->ip.dstAddr));
+    REF_convertIPAddrAscii2Network("192.168.0.4", &(params->ip.srcAddr));
+    REF_convertIPAddrAscii2Network("192.168.0.3", &(params->ip.dstAddr));
     params->ip.protocol = REF_USE_UDP;
 
     // setup udp header
@@ -164,16 +164,16 @@ static void setupTCP(struct REF_param_t *params) {
     memset(params, 0x00, sizeof(struct REF_param_t));
 
     // setup ether header
-    REF_convertMacAddrAscii2Network("11:22:33:44:55:66", params->ether_header.dstMacAddr);
-    REF_convertMacAddrAscii2Network("AA:BB:CC:DD:EE:FF", params->ether_header.srcMacAddr);
+    REF_convertMacAddrAscii2Network("11:22:33:44:55:66", params->eth.dstMacAddr);
+    REF_convertMacAddrAscii2Network("AA:BB:CC:DD:EE:FF", params->eth.srcMacAddr);
 
     // setup ip header
     params->ip.ttl = 0x40;
     params->ip.tos = 0x00;
     params->ip.fragOffset = 0x4000;
     params->ip.id = 0x920c;
-    REF_convertIPAddrAscii2Network("192.168.1.2", &(params->ip.srcAddr));
-    REF_convertIPAddrAscii2Network("192.168.1.3", &(params->ip.dstAddr));
+    REF_convertIPAddrAscii2Network("192.168.0.4", &(params->ip.srcAddr));
+    REF_convertIPAddrAscii2Network("192.168.0.3", &(params->ip.dstAddr));
     params->ip.protocol = REF_USE_TCP;
 
     // setup tcp header

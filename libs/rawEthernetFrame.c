@@ -71,7 +71,7 @@ int32_t REF_createRawFrame(const struct REF_param_t *params, struct REF_rawFrame
         memset(frame->buf, 0x00, REF_MAX_FRAME_LENGTH);
         frame->length = 0;
         // setup Ether header (L2 layer)
-        funcVal = setupEtherHeader(params->ether_header.dstMacAddr, params->ether_header.srcMacAddr, frame);
+        funcVal = setupEtherHeader(params->eth.dstMacAddr, params->eth.srcMacAddr, frame);
         if ((int32_t)ETHER_HEADER_RETURN_OK != funcVal) {
             goto EXIT_CREATE_RAW_FRAME;
         }
