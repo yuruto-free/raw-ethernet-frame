@@ -10,9 +10,15 @@ Create a raw IEEE 802.3 Ethernet frame to send udp/tcp packets.
 
 ## Usage
 ### Build
-Run the following commands.
+Run the following command.
 
 ```sh
 make
 ```
 
+### Execute
+Execute the following command.
+
+```sh
+./target
+```
