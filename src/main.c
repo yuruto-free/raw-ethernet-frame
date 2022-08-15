@@ -39,9 +39,9 @@ static int32_t callback(uint8_t packetType, void *data) {
     struct ip_header_t *ip;
     struct udp_header_t *udp;
     struct tcp_header_t *tcp;
+    struct tcp_flags_t tcpFlags;
     uint16_t fragmentOffset;
     int32_t len;
-    uint8_t flags;
 
     switch (packetType) {
         case REF_ETHER_PACKET:
@@ -91,16 +91,16 @@ static int32_t callback(uint8_t packetType, void *data) {
 
         case REF_TCP_PACKET:
             tcp = (struct tcp_header_t *)data;
-            flags = tcp->flags;
+            (void)REF_getTcpFlags(tcp->flags, &tcpFlags);
             printf("===     TCP header    ===\n");
             printf("Src Port:        0x%04x (%d)\n", tcp->srcPort, tcp->srcPort);
             printf("Dst Port:        0x%04x (%d)\n", tcp->dstPort, tcp->dstPort);
             printf("Seq Num:         0x%08x\n", tcp->seqNum);
             printf("Ack Num:         0x%08x\n", tcp->ackNum);
             printf("Data Offset:     0x%02x\n", tcp->dataOffset);
-            printf("Flags:           0x%02x\n", flags);
-            printf(" URG: 0x%02x, ACK: 0x%02x, PSH: 0x%02x\n", REF_GET_TCP_URG(flags), REF_GET_TCP_ACK(flags), REF_GET_TCP_PSH(flags));
-            printf(" RST: 0x%02x, SYN: 0x%02x, FIN: 0x%02x\n", REF_GET_TCP_RST(flags), REF_GET_TCP_SYN(flags), REF_GET_TCP_FIN(flags));
+            printf("Flags:           0x%02x\n", tcp->flags);
+            printf(" URG: 0x%02x, ACK: 0x%02x, PSH: 0x%02x\n", tcpFlags.urg, tcpFlags.ack, tcpFlags.psh);
+            printf(" RST: 0x%02x, SYN: 0x%02x, FIN: 0x%02x\n", tcpFlags.rst, tcpFlags.syn, tcpFlags.fin);
             printf("Window Size:     0x%04x\n", tcp->windowSize);
             printf("Checksum:        0x%04x\n", tcp->checksum);
             printf("Urgent Pointer:  0x%04x\n", tcp->urgentPointer);
@@ -150,6 +150,7 @@ static void setupUDP(struct REF_param_t *params) {
 }
 
 static void setupTCP(struct REF_param_t *params) {
+    struct tcp_flags_t tcpFlags;
     uint8_t dummyData[] = {0x61, 0x62, 0x63};
     const uint8_t options[] = {
         // No Operation * 2
@@ -162,6 +163,7 @@ static void setupTCP(struct REF_param_t *params) {
 
     // initialize
     memset(params, 0x00, sizeof(struct REF_param_t));
+    memset(&tcpFlags, 0x00, sizeof(struct tcp_flags_t));
 
     // setup ether header
     REF_convertMacAddrAscii2Network("11:22:33:44:55:66", params->eth.dstMacAddr);
@@ -177,11 +179,13 @@ static void setupTCP(struct REF_param_t *params) {
     params->ip.protocol = REF_USE_TCP;
 
     // setup tcp header
+    tcpFlags.ack = 0x01;
+    tcpFlags.psh = 0x01;
     params->tcp.srcPort = 0xdfe6;
     params->tcp.dstPort = 0x22ba;
     params->tcp.seqNum = 0x5d66c47c;
     params->tcp.ackNum = 0x4fa40985;
-    params->tcp.flags = 0x18;
+    (void)REF_setTcpFlags((const struct tcp_flags_t *)&tcpFlags, &(params->tcp.flags));
     params->tcp.windowSize = 0x01f6;
     params->tcp.urgentPointer = 0x0000;
     params->tcp.dataLength = (uint16_t)sizeof(dummyData);

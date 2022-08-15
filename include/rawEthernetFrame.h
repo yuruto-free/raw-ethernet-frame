@@ -29,9 +29,27 @@ struct REF_param_t {
     struct {
         uint8_t ttl;
         uint8_t tos; // type of service
+        //
+        // === The type of service is defined by following structure ===
+        //
+        //     1bit  2bit  3bit  4bit  5bit  6bit  7bit  8bit
+        //   +-----+-----+-----+-----+-----+-----+-----+-----+
+        //   |       DiffServe Code Point        | ECT |  CE |
+        //   +-----+-----+-----+-----+-----+-----+-----+-----+
+        //   |<---   Upper Bit   --->|<---   Lower Bit   --->|
+        //
         uint8_t protocol; // REF_USE_TCP or REF_USE_UDP
         uint8_t padding;
         uint16_t fragOffset;
+        //
+        // === The type of service is defined by following structure ===
+        //
+        //     1bit  2bit  3bit  4bit  5bit  6bit  7bit  8bit
+        //   +-----+-----+-----+-----+-----+-----+-----+-----+
+        //   | Res |  DF |  MF |       Fragment Offset       |
+        //   +-----+-----+-----+-----+-----+-----+-----+-----+
+        //   |<---   Upper Bit   --->|<---   Lower Bit   --->|
+        //
         uint16_t id;
         uint32_t srcAddr;
         uint32_t dstAddr;
@@ -66,6 +84,16 @@ struct REF_param_t {
         const uint8_t *options;
     } tcp;
     const uint8_t *data;
+};
+
+struct tcp_flags_t {
+    uint16_t reserved;
+    uint8_t urg;
+    uint8_t ack;
+    uint8_t psh;
+    uint8_t rst;
+    uint8_t syn;
+    uint8_t fin;
 };
 
 /**
@@ -116,6 +144,26 @@ int32_t REF_getTotalRawFrameLength(const struct REF_rawFrame_t *frame, int32_t *
  *             REF_FAILED  : failed
  */
 int32_t REF_getData(const struct REF_rawFrame_t *frame, int32_t idx, uint8_t *data);
+
+/**
+ * @brief set tcp flags
+ *
+ * @param[in]  tcpFlags input tcp flags
+ * @param[out] flags    output tcp flags
+ * @return     REF_SUCCESS : success
+ *             REF_FAILED  : failed
+ */
+int32_t REF_setTcpFlags(const struct tcp_flags_t *tcpFlags, uint8_t *flags);
+
+/**
+ * @brief get tcp flags
+ *
+ * @param[in]  flags    input tcp flags
+ * @param[out] tcpFlags output tcp flags
+ * @return     REF_SUCCESS : success
+ *             REF_FAILED  : failed
+ */
+int32_t REF_getTcpFlags(uint8_t flags, struct tcp_flags_t *tcpFlags);
 
 /**
  * @brief dump raw frame
