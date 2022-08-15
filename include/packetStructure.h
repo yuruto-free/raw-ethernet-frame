@@ -3,13 +3,6 @@
 #include <stdint.h>
 #define REF_ETHER_MACADDR_LENGTH (18)
 #define REF_IPADDR_LENGTH (16)
-#define REF_GET_TCP_FLAGS(x, shift) ((uint8_t)((x) >> (shift)) & (uint8_t)0x01)
-#define REF_GET_TCP_URG(x) REF_GET_TCP_FLAGS(x, 5)
-#define REF_GET_TCP_ACK(x) REF_GET_TCP_FLAGS(x, 4)
-#define REF_GET_TCP_PSH(x) REF_GET_TCP_FLAGS(x, 3)
-#define REF_GET_TCP_RST(x) REF_GET_TCP_FLAGS(x, 2)
-#define REF_GET_TCP_SYN(x) REF_GET_TCP_FLAGS(x, 1)
-#define REF_GET_TCP_FIN(x) REF_GET_TCP_FLAGS(x, 0)
 
 struct ether_header_t {
     char dstMacAddr[REF_ETHER_MACADDR_LENGTH];

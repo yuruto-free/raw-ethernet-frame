@@ -15,6 +15,20 @@
 #include "utils.h"
 #define FUNC_RETURN_OK (0)
 #define FUNC_RETURN_NG (1)
+#define REF_GET_TCP_FLAGS(x, shift) ((uint8_t)((x) >> (shift)) & (uint8_t)0x01)
+#define REF_GET_TCP_URG(x) REF_GET_TCP_FLAGS(x, 5)
+#define REF_GET_TCP_ACK(x) REF_GET_TCP_FLAGS(x, 4)
+#define REF_GET_TCP_PSH(x) REF_GET_TCP_FLAGS(x, 3)
+#define REF_GET_TCP_RST(x) REF_GET_TCP_FLAGS(x, 2)
+#define REF_GET_TCP_SYN(x) REF_GET_TCP_FLAGS(x, 1)
+#define REF_GET_TCP_FIN(x) REF_GET_TCP_FLAGS(x, 0)
+#define REF_SET_TCP_FLAGS(x, shift) ((uint8_t)((x) << (shift)) & (uint8_t)(0x01 << (shift)))
+#define REF_SET_TCP_URG(x) REF_SET_TCP_FLAGS(x, 5)
+#define REF_SET_TCP_ACK(x) REF_SET_TCP_FLAGS(x, 4)
+#define REF_SET_TCP_PSH(x) REF_SET_TCP_FLAGS(x, 3)
+#define REF_SET_TCP_RST(x) REF_SET_TCP_FLAGS(x, 2)
+#define REF_SET_TCP_SYN(x) REF_SET_TCP_FLAGS(x, 1)
+#define REF_SET_TCP_FIN(x) REF_SET_TCP_FLAGS(x, 0)
 
 struct transport_layer_t {
     size_t size;
@@ -158,6 +172,40 @@ int32_t REF_getData(const struct REF_rawFrame_t *frame, int32_t idx, uint8_t *da
     }
 
     return retVal;
+}
+
+int32_t REF_setTcpFlags(const struct tcp_flags_t *tcpFlags, uint8_t *flags) {
+    int32_t retVal = (int32_t)REF_FAILED;
+
+    if ((NULL != tcpFlags) && (NULL != flags)) {
+        (*flags) =   (uint8_t)REF_SET_TCP_URG(tcpFlags->urg)
+                   | (uint8_t)REF_SET_TCP_ACK(tcpFlags->ack)
+                   | (uint8_t)REF_SET_TCP_PSH(tcpFlags->psh)
+                   | (uint8_t)REF_SET_TCP_RST(tcpFlags->rst)
+                   | (uint8_t)REF_SET_TCP_SYN(tcpFlags->syn)
+                   | (uint8_t)REF_SET_TCP_FIN(tcpFlags->fin);
+        retVal = (int32_t)REF_SUCCESS;
+    }
+
+    return retVal;
+}
+
+int32_t REF_getTcpFlags(uint8_t flags, struct tcp_flags_t *tcpFlags) {
+    int32_t retVal = (int32_t)REF_FAILED;
+
+    if (NULL != tcpFlags) {
+        tcpFlags->reserved = (uint8_t)0x00;
+        tcpFlags->urg = (uint8_t)REF_GET_TCP_URG(flags);
+        tcpFlags->ack = (uint8_t)REF_GET_TCP_ACK(flags);
+        tcpFlags->psh = (uint8_t)REF_GET_TCP_PSH(flags);
+        tcpFlags->rst = (uint8_t)REF_GET_TCP_RST(flags);
+        tcpFlags->syn = (uint8_t)REF_GET_TCP_SYN(flags);
+        tcpFlags->fin = (uint8_t)REF_GET_TCP_FIN(flags);
+        retVal = (int32_t)REF_SUCCESS;
+    }
+
+    return retVal;
+
 }
 
 int32_t REF_dumpRawFrame(const struct REF_rawFrame_t *frame, REF_callback callback) {

@@ -7,7 +7,7 @@
 #include "tcpHeader.h"
 #include "utils.h"
 #define CALC_DATA_OFFSET(x) ((x) / 4)
-#define UPDATE_PSEUDO_DATAOFFSET(x) ((uint8_t)(CALC_DATA_OFFSET(x) << 4) & (uint8_t)0xF0)
+#define UPDATE_PSEUDO_DATAOFFSET(x) ((CALC_DATA_OFFSET(x) << 4) & 0xF0)
 #define GET_DATAOFFSET(doff) ((doff) * 4)
 
 struct pseudo_header_t {
@@ -46,9 +46,9 @@ int32_t setupTcpHeader(const struct tcp_header_arg_t *arg, struct REF_rawFrame_t
     int32_t retVal = (int32_t)TCP_HEADER_RETURN_NG;
     struct tcphdr tcp;
     struct checksum_arg_t chksumArg;
-    int32_t pos;
     uint8_t flags;
     uint16_t tcpBaseSize, tcpHeaderSize;
+    uint8_t *ptr;
 
     if ((NULL != arg) && (NULL != frame)) {
         flags = arg->flags;
@@ -86,13 +86,13 @@ int32_t setupTcpHeader(const struct tcp_header_arg_t *arg, struct REF_rawFrame_t
         // calculate checksum
         tcp.check = calcChksum((const struct checksum_arg_t *)&chksumArg);
         // update raw frame
-        pos = frame->length;
-        memcpy(&(frame->buf[pos]), &tcp, tcpBaseSize);
-        pos += (int32_t)tcpBaseSize;
-        memcpy(&(frame->buf[pos]), arg->options, chksumArg.optionLength);
-        pos += chksumArg.optionLength;
-        memcpy(&(frame->buf[pos]), arg->data, arg->dataLength);
-        frame->length += ((int32_t)tcpBaseSize + chksumArg.optionLength + arg->dataLength);
+        ptr = &(frame->buf[frame->length]);
+        memcpy(ptr, &tcp, tcpBaseSize);
+        ptr += (size_t)tcpBaseSize;
+        memcpy(ptr, arg->options, chksumArg.optionLength);
+        ptr += (size_t)chksumArg.optionLength;
+        memcpy(ptr, arg->data, arg->dataLength);
+        frame->length += (int32_t)(tcpBaseSize + chksumArg.optionLength + arg->dataLength);
         retVal = (int32_t)TCP_HEADER_RETURN_OK;
     }
 
@@ -111,7 +111,7 @@ int32_t dumpTcpHeader(const uint8_t *ptr, struct tcp_header_t *tcp, size_t *offs
         tcp->dstPort = wrapper_ntohs(base->dest);
         tcp->seqNum = wrapper_ntohl(base->seq);
         tcp->ackNum = wrapper_ntohl(base->ack_seq);
-        tcp->dataOffset = (uint8_t)(base->th_off);
+        tcp->dataOffset = base->th_off;
         tcp->flags = base->th_flags;
         tcp->windowSize = wrapper_ntohs(base->window);
         tcp->checksum = wrapper_ntohs(base->check);
