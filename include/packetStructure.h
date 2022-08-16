@@ -3,6 +3,8 @@
 #include <stdint.h>
 #define REF_ETHER_MACADDR_LENGTH (18)
 #define REF_IPADDR_LENGTH (16)
+#define REF_GET_ECT(x) (((x) >> 4) & 0x01)
+#define REF_GET_CE(x) ((x) & 0x01)
 
 struct ether_header_t {
     char dstMacAddr[REF_ETHER_MACADDR_LENGTH];
@@ -25,7 +27,16 @@ struct ip_header_t {
     uint8_t protocol;
     uint8_t flags;
     uint8_t dscp;
-    uint8_t ECT_CE; // ECT: upper 4bit, CE: lower 4bit [ex: 0x10 -> ECT = 1, CE = 0]
+    uint8_t ECT_CE;
+    //
+    // === The ECT_CE is defined by following structure ===
+    //
+    //     1bit  2bit  3bit  4bit  5bit  6bit  7bit  8bit
+    //   +-----+-----+-----+-----+-----+-----+-----+-----+
+    //   |          ECT          |           CE          |
+    //   +-----+-----+-----+-----+-----+-----+-----+-----+
+    //   |<---   Upper Bit   --->|<---   Lower Bit   --->|
+    //
 };
 
 struct udp_header_t {

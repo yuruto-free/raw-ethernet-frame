@@ -61,8 +61,8 @@ static int32_t callback(uint8_t packetType, void *data) {
             printf("Header Length:   %d (%d)\n", ip->headerLength, ip->headerLength * 4);
             printf("Type of Service: 0x%02x\n", ip->tos);
             printf("DSCP:            0x%02x\n", ip->dscp);
-            printf("ECT:             0x%02x\n", ((ip->ECT_CE) >> 1) & 0x01);
-            printf("CE:              0x%02x\n", (ip->ECT_CE) & 0x01);
+            printf("ECT:             0x%02x\n", (uint8_t)REF_GET_ECT(ip->ECT_CE));
+            printf("CE:              0x%02x\n", (uint8_t)REF_GET_CE(ip->ECT_CE));
             printf("Total Length:    0x%04x (%u)\n", ip->totalLength, ip->totalLength);
             printf("Identification:  0x%04x\n", ip->id);
             printf("Time to Live:    0x%02x (%u)\n", ip->ttl, ip->ttl);
